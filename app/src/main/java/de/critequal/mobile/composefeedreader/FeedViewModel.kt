@@ -1,6 +1,6 @@
 package de.critequal.mobile.composefeedreader
 
-import androidx.lifecycle.LiveData
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,57 +14,55 @@ import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import kotlin.collections.ArrayList
 
 class FeedViewModel(private val database: FeedDatabase) : ViewModel() {
 
-    private val cachedFeeds = ArrayList<RSS>()
-    private val feeds: MutableLiveData<List<RSS>> by lazy {
-        MutableLiveData<List<RSS>>().also {
-            viewModelScope.launch {
-                fetchFeeds()
-            }
+    var feeds = mutableStateListOf<RSS>()
+    var urls = mutableStateListOf<FeedURL>()
+
+    init {
+        viewModelScope.launch {
+            fetchFeeds()
+            updateFeedURLs()
         }
     }
-    private val urls: MutableLiveData<List<FeedURL>> by lazy {
-        MutableLiveData<List<FeedURL>>().also {
-            viewModelScope.launch {
-                getFeedURLs()
-            }
-        }
-    }
+
+
 
     var error: MutableLiveData<String> = MutableLiveData("")
 
-    fun getFeeds(): LiveData<List<RSS>> {
-        return feeds
-    }
-
-    fun getURLs(): LiveData<List<FeedURL>> {
-        return urls
+    suspend fun removeURL(url: FeedURL) {
+        withContext(Dispatchers.IO) {
+            database.feedURLDao().delete(url)
+            urls.remove(url)
+        }
     }
 
     suspend fun addFeedURL(url: String) {
         withContext(Dispatchers.IO) {
             database.feedURLDao()
                 .insertAll(FeedURL(url = url))
+            updateFeedURLs()
         }
     }
 
-    private suspend fun getFeedURLs() {
+    suspend fun updateFeedURLs() {
         withContext(Dispatchers.IO) {
-            urls.postValue(database.feedURLDao().getAll())
+            val urlDAOs = database.feedURLDao().getAll()
+            urls.removeAll(urlDAOs)
+            urls.addAll(urlDAOs)
         }
     }
 
-    private suspend fun fetchFeeds() {
+    suspend fun fetchFeeds() {
         withContext(Dispatchers.IO) {
             database.feedURLDao().getAll().forEach { feedURL ->
                 ApiFacade.create().getChannel(feedURL.url).enqueue(object : Callback<RSS> {
                     override fun onResponse(call: Call<RSS>, response: Response<RSS>) {
                         if (response.code() == 200) {
                             response.body()?.let { channel ->
-                                cachedFeeds.add(channel)
+                                feeds.remove(channel)
+                                feeds.add(channel)
                             }
                         }
                     }
@@ -73,7 +71,6 @@ class FeedViewModel(private val database: FeedDatabase) : ViewModel() {
                         error.postValue(t.message)
                     }
                 })
-                feeds.postValue(cachedFeeds)
             }
         }
     }

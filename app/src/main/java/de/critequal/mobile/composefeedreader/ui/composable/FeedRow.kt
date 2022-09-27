@@ -5,6 +5,8 @@ import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,7 +25,6 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
 import coil.compose.rememberAsyncImagePainter
-import de.critequal.mobile.composefeedreader.FeedApplication
 import de.critequal.mobile.composefeedreader.dto.Item
 import de.critequal.mobile.composefeedreader.dto.toFeedItem
 import de.critequal.mobile.composefeedreader.ui.theme.BlackTranslucent40
@@ -76,9 +77,11 @@ fun FeedRow (item: Item) {
                 modifier = Modifier
                     .padding(8.dp, 8.dp, 8.dp, 8.dp),
                 textAlign = TextAlign.Justify,
-                fontSize = TextUnit(18F,
+                fontSize = TextUnit(12F,
                     TextUnitType.Sp
                 ),
+                letterSpacing = TextUnit(-.5F, TextUnitType.Sp),
+                lineHeight = TextUnit(14F, TextUnitType.Sp),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -89,13 +92,21 @@ fun FeedRow (item: Item) {
                 ),
                 thickness = 1.dp
             )
-            Text(
-                text = item.toFeedItem().timeDiff.format(),
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(8.dp, 12.dp, 8.dp, 12.dp),
-                fontStyle = FontStyle.Italic
-            )
+            Row(
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text(
+                    text = item.toFeedItem().timeDiff.format(),
+                    modifier = Modifier
+                        .padding(0.dp, 2.dp, 4.dp, 12.dp),
+                    fontSize = TextUnit(12F, TextUnitType.Sp),
+                    fontStyle = FontStyle.Italic
+                )
+                Icon(
+                    Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Follow"
+                )
+            }
         }
     }
 }

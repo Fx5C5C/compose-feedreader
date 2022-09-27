@@ -9,8 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -18,9 +17,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import de.critequal.mobile.composefeedreader.FeedViewModel
 import de.critequal.mobile.composefeedreader.dto.Item
-import de.critequal.mobile.composefeedreader.dto.RSS
 import de.critequal.mobile.composefeedreader.dto.toFeedItem
 import de.critequal.mobile.composefeedreader.ui.theme.ComposefeedreaderTheme
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -30,7 +29,9 @@ fun FeedScreen(
     navController: NavController = rememberNavController(),
     viewModel: FeedViewModel = get()
 ) {
-    val channels:List<RSS>? by viewModel.getFeeds().observeAsState(null)
+    rememberCoroutineScope().launch {
+        viewModel.fetchFeeds()
+    }
     Scaffold(
         floatingActionButton = {
             ComposefeedreaderTheme {
@@ -51,8 +52,8 @@ fun FeedScreen(
                         color = MaterialTheme.colorScheme.background,
                     ) {
                         AnimatedVisibility(
-                            visible = channels == null,
-                            exit = fadeOut(animationSpec = tween(durationMillis = 1500))
+                            visible = viewModel.feeds.isEmpty(),
+                            exit = fadeOut(animationSpec = tween(durationMillis = 500))
                         ) {
                             CircularProgressIndicator(
                                 modifier = Modifier.padding(128.dp)
@@ -60,8 +61,8 @@ fun FeedScreen(
                             )
                         }
                         AnimatedVisibility(
-                            visible = channels != null && channels!!.isEmpty(),
-                            exit = fadeOut(animationSpec = tween(durationMillis = 1500))
+                            visible = viewModel.feeds.isEmpty(),
+                            exit = fadeOut(animationSpec = tween(durationMillis = 500))
                         ) {
                             Text(
                                 text = "No feeds available",
@@ -69,16 +70,16 @@ fun FeedScreen(
                                 modifier = Modifier.wrapContentHeight()
                             )
                         }
-                        channels?.let { channels ->
-                            val items = ArrayList<Item>()
-                            for (channel in channels) {
-                                channel.channel?.let { chn ->
-                                    items.addAll(chn.items)
-                                }
+                        val items = ArrayList<Item>()
+                        for (rss in viewModel.feeds) {
+                            rss.channel?.let {
+                                items.addAll(it.items)
                             }
-                            items.sortBy{ item ->
+                            items.sortBy { item ->
                                 item.toFeedItem().timeDiff.seconds
                             }
+                        }
+                        if (items.size > 0) {
                             FeedList(items = items)
                         }
                     }
