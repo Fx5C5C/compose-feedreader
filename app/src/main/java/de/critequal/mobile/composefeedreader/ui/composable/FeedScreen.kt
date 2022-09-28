@@ -17,7 +17,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import de.critequal.mobile.composefeedreader.FeedViewModel
 import de.critequal.mobile.composefeedreader.dto.Item
-import de.critequal.mobile.composefeedreader.dto.toFeedItem
+import de.critequal.mobile.composefeedreader.dto.getTimePassed
 import de.critequal.mobile.composefeedreader.ui.theme.ComposefeedreaderTheme
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -72,15 +72,17 @@ fun FeedScreen(
                         }
                         val items = ArrayList<Item>()
                         for (rss in viewModel.feeds) {
-                            rss.channel?.let {
-                                items.addAll(it.items)
+                            rss.channel?.let { channel ->
+                                val channelItems = channel.items
+                                channelItems.forEach { it.source = channel.title }
+                                items.addAll(channelItems)
                             }
                             items.sortBy { item ->
-                                item.toFeedItem().timeDiff.seconds
+                                item.getTimePassed().seconds
                             }
                         }
                         if (items.size > 0) {
-                            FeedList(items = items)
+                            FeedList(items = items.distinct().filter { item -> item.getTimePassed().days < 31 })
                         }
                     }
                 }

@@ -1,6 +1,5 @@
 package de.critequal.mobile.composefeedreader.dto
 
-import de.critequal.mobile.composefeedreader.model.FeedItem
 import de.critequal.mobile.composefeedreader.model.SimpleTime
 import org.simpleframework.xml.Element
 import org.simpleframework.xml.Root
@@ -14,6 +13,7 @@ import java.util.*
 
 @Root(name = "item", strict = false)
 data class Item @JvmOverloads constructor(
+    var source: String = "",
     @field:Element(name = "title", required = false) var title: String = "",
     @field:Element(name = "link", required = false) var link: String = "",
     @field:Element(name = "description", required = false) var description: String = "",
@@ -21,7 +21,7 @@ data class Item @JvmOverloads constructor(
     @field:Element(name = "enclosure", required = false) var enclosure: Enclosure? = null
 )
 
-fun Item.toFeedItem(): FeedItem {
+fun Item.getTimePassed(): SimpleTime {
     var pubDate: LocalDateTime
     try {
         pubDate = LocalDateTime.from(DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(this.pubDate))
@@ -37,17 +37,10 @@ fun Item.toFeedItem(): FeedItem {
     val hours = minutes / 60
     val days = hours / 24
 
-    val timeDiff = SimpleTime(
+    return SimpleTime(
         seconds,
         minutes,
         hours,
         days
-    )
-
-    return FeedItem(
-        this.title,
-        this.description,
-        this.link,
-        timeDiff
     )
 }

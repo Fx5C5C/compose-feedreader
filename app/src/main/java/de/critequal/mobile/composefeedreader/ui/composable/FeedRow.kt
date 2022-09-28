@@ -2,6 +2,7 @@ package de.critequal.mobile.composefeedreader.ui.composable
 
 import android.content.Intent
 import android.net.Uri
+import android.text.Html
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -26,17 +27,17 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
 import coil.compose.rememberAsyncImagePainter
 import de.critequal.mobile.composefeedreader.dto.Item
-import de.critequal.mobile.composefeedreader.dto.toFeedItem
+import de.critequal.mobile.composefeedreader.dto.getTimePassed
 import de.critequal.mobile.composefeedreader.ui.theme.BlackTranslucent40
 
 
 @OptIn(ExperimentalUnitApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun FeedRow (item: Item) {
+fun FeedRow(item: Item) {
     val context = LocalContext.current
     Card(
-        elevation = CardDefaults.cardElevation(48.dp),
-        modifier = Modifier.padding(12.dp, 6.dp, 12.dp, 24.dp),
+        elevation = CardDefaults.cardElevation(148.dp),
+        modifier = Modifier.padding(12.dp, 6.dp, 12.dp, 4.dp),
         colors = CardDefaults.cardColors(
             Color.White
         ),
@@ -73,7 +74,7 @@ fun FeedRow (item: Item) {
                 )
             }
             Text(
-                text = item.description,
+                text = Html.fromHtml(item.description, Html.FROM_HTML_MODE_COMPACT).toString(),
                 modifier = Modifier
                     .padding(8.dp, 8.dp, 8.dp, 8.dp),
                 textAlign = TextAlign.Justify,
@@ -93,13 +94,24 @@ fun FeedRow (item: Item) {
                 thickness = 1.dp
             )
             Row(
-                modifier = Modifier.align(Alignment.End)
+                modifier = Modifier.align(Alignment.Start)
             ) {
                 Text(
-                    text = item.toFeedItem().timeDiff.format(),
+                    text = item.source,
                     modifier = Modifier
-                        .padding(0.dp, 2.dp, 4.dp, 12.dp),
-                    fontSize = TextUnit(12F, TextUnitType.Sp),
+                        .align(Alignment.Top)
+                        .weight(2F)
+                        .padding(8.dp, 2.dp, 0.dp, 12.dp)
+                        .fillMaxWidth(),
+                    fontSize = TextUnit(10F, TextUnitType.Sp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = item.getTimePassed().format(),
+                    modifier = Modifier
+                        .padding(0.dp, 2.dp, 12.dp, 12.dp),
+                    fontSize = TextUnit(10F, TextUnitType.Sp),
                     fontStyle = FontStyle.Italic
                 )
                 Icon(
