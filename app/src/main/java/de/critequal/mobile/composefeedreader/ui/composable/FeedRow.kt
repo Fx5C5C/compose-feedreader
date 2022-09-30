@@ -1,31 +1,31 @@
 package de.critequal.mobile.composefeedreader.ui.composable
 
-import android.content.Intent
-import android.net.Uri
-import android.text.Html
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.startActivity
 import coil.compose.rememberAsyncImagePainter
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec.*
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
+import de.critequal.mobile.composefeedreader.R
+import de.critequal.mobile.composefeedreader.dto.Enclosure
 import de.critequal.mobile.composefeedreader.dto.Item
 import de.critequal.mobile.composefeedreader.dto.getTimePassed
 import de.critequal.mobile.composefeedreader.ui.theme.BlackTranslucent40
@@ -34,18 +34,21 @@ import de.critequal.mobile.composefeedreader.ui.theme.BlackTranslucent40
 @OptIn(ExperimentalUnitApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FeedRow(item: Item) {
-    val context = LocalContext.current
+    val composition by rememberLottieComposition(RawRes(R.raw.maximize))
+    var showDetailsDialog by remember { mutableStateOf(false) }
+
     Card(
-        elevation = CardDefaults.cardElevation(148.dp),
-        modifier = Modifier.padding(12.dp, 6.dp, 12.dp, 4.dp),
+        elevation = CardDefaults.cardElevation(3.dp),
+        modifier = Modifier
+            .padding(12.dp, 6.dp, 12.dp, 4.dp),
         colors = CardDefaults.cardColors(
             Color.White
         ),
-        onClick = {
-            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(item.link))
-            startActivity(context, browserIntent, null)
-        }
+        onClick = { showDetailsDialog = true }
     ) {
+        if (showDetailsDialog) {
+            FeedDetails(item = item) { showDetailsDialog = false }
+        }
         Column(
             verticalArrangement = Arrangement.Bottom
         ) {
@@ -57,68 +60,77 @@ fun FeedRow(item: Item) {
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(128.dp)
+                            .height(72.dp)
                     )
                 }
                 Text(
                     text = item.title,
                     style = TextStyle(
-                        fontWeight = FontWeight(FontWeight.ExtraBold.weight)
+                        fontWeight = FontWeight(FontWeight.ExtraBold.weight),
+                        fontSize = TextUnit(12F, TextUnitType.Sp)
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.BottomStart)
+                        .align(Alignment.TopStart)
                         .background(BlackTranslucent40)
                         .padding(8.dp),
                     color = Color.White,
                 )
             }
-            Text(
-                text = Html.fromHtml(item.description, Html.FROM_HTML_MODE_COMPACT).toString(),
-                modifier = Modifier
-                    .padding(8.dp, 8.dp, 8.dp, 8.dp),
-                textAlign = TextAlign.Justify,
-                fontSize = TextUnit(12F,
-                    TextUnitType.Sp
-                ),
-                letterSpacing = TextUnit(-.5F, TextUnitType.Sp),
-                lineHeight = TextUnit(14F, TextUnitType.Sp),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            Divider(
-                color = BlackTranslucent40,
-                modifier = Modifier.padding(
-                    24.dp, 0.dp, 24.dp, 12.dp
-                ),
-                thickness = 1.dp
-            )
-            Row(
-                modifier = Modifier.align(Alignment.Start)
-            ) {
+            Row {
                 Text(
                     text = item.source,
                     modifier = Modifier
                         .align(Alignment.Top)
-                        .weight(2F)
-                        .padding(8.dp, 2.dp, 0.dp, 12.dp)
+                        .weight(1F)
+                        .padding(8.dp, 8.dp, 0.dp, 8.dp)
                         .fillMaxWidth(),
                     fontSize = TextUnit(10F, TextUnitType.Sp),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(
-                    text = item.getTimePassed().format(),
+                LottieAnimation(
+                    composition = composition,
+                    iterations = LottieConstants.IterateForever,
                     modifier = Modifier
-                        .padding(0.dp, 2.dp, 12.dp, 12.dp),
-                    fontSize = TextUnit(10F, TextUnitType.Sp),
-                    fontStyle = FontStyle.Italic
+                        .padding(0.dp, 8.dp, 0.dp, 8.dp)
+                        .size(12.dp)
+                        .scale(6F)
                 )
-                Icon(
-                    Icons.Default.KeyboardArrowRight,
-                    contentDescription = "Follow"
-                )
+                Box(modifier = Modifier
+                    .weight(1F)) {
+                    Text(
+                        text = "~ ${item.getTimePassed().format()}",
+                        modifier = Modifier
+                            .padding(0.dp, 8.dp, 12.dp, 8.dp)
+                            .align(Alignment.CenterEnd),
+                        fontSize = TextUnit(10F, TextUnitType.Sp),
+                        fontStyle = FontStyle.Italic
+                    )
+                }
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun FeedRowPreview() {
+    val item = Item(
+        "FeedSource.com",
+        "An example feed title of an interesting topic",
+        "https://www.google.com",
+        """
+            This is the description with more detailed information about all the
+            interesting things from a feed you want to read more about. Click the 
+            feed item and you can read me.
+        """,
+        "Fri, 30 Sep 2022 19:52:00 GMT",
+        Enclosure(
+            "0",
+            "image/jpg",
+            "https://images.cgames.de/images/gamestar/112/gs-stadia-wird-beendet_6197841.jpg"
+        )
+    )
+    FeedRow(item = item)
 }

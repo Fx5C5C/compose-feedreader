@@ -11,3 +11,13 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 val BlackTranslucent40 = Color(0x55000000)
+
+val Green200 = Color(0xFFC5E1A5)
+val Lime50 = Color(0xFFF9FBE7)
+val Lime200 = Color(0xFFE6EE9C)
+val Green400 = Color(0xFF9CCC65)
+
+val Green800 = Color(0xFF558B2F)
+val LightGreen50 = Color(0xFFF1F8E9)
+val Lime800 = Color(0xFF9E9D24)
+val Green600 = Color(0xFF7CB342)

@@ -1,12 +1,5 @@
 package de.critequal.mobile.composefeedreader.model
 
-data class FeedItem(
-    val title: String,
-    val summary: String,
-    val link: String,
-    val timeDiff: SimpleTime
-)
-
 data class SimpleTime(
     val seconds: Long,
     val minutes: Long,
