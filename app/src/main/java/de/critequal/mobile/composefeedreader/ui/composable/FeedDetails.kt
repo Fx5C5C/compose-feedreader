@@ -27,6 +27,7 @@ import de.critequal.mobile.composefeedreader.dto.Item
 fun FeedDetails(item: Item, onDismiss: () -> Unit) {
     val context = LocalContext.current
     AlertDialog(
+        shape = MaterialTheme.shapes.small,
         tonalElevation = 8.dp,
         onDismissRequest = {
             onDismiss()

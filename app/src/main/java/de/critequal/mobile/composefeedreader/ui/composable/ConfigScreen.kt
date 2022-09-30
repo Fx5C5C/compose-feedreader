@@ -21,9 +21,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -50,6 +52,7 @@ fun ConfigScreen(
     rememberedScope: CoroutineScope = rememberCoroutineScope()
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.swipe))
+    val focusManager = LocalFocusManager.current
     rememberedScope.launch {
         viewModel.updateFeedURLs()
     }
@@ -57,9 +60,13 @@ fun ConfigScreen(
     Scaffold(
         floatingActionButton = {
             ComposefeedreaderTheme {
-                FloatingActionButton(onClick = { navController.navigateUp()  }) {
+                FloatingActionButton(
+                    shape = androidx.compose.material3.MaterialTheme.shapes.extraLarge,
+                    onClick = { navController.navigateUp()  }
+                ) {
                     Icon(
                         Icons.Default.ArrowBack,
+                        tint = Color.White,
                         contentDescription = "Back"
                     )
 
@@ -85,6 +92,8 @@ fun ConfigScreen(
                         onClick = {
                             rememberedScope.launch {
                                 viewModel.addFeedURL(textState.value.text)
+                                focusManager.clearFocus()
+                                textState.value = TextFieldValue()
                             }
                         },
                         modifier = Modifier
@@ -101,22 +110,12 @@ fun ConfigScreen(
                         thickness = 2.dp,
                         modifier = Modifier.padding(8.dp)
                     )
-                    LottieAnimation(
-                        composition = composition,
-                        iterations = LottieConstants.IterateForever,
-                        modifier = Modifier
-                            .align(Alignment.End)
-                            .padding(0.dp, 8.dp, 10.dp, 8.dp)
-                            .size(24.dp)
-                            .scale(4F)
-                    )
                     LazyColumn {
                         items(items = viewModel.urls, key = { it.uid }) { url ->
-                            var dismissState = rememberDismissState(initialValue = DismissValue.Default)
+                            val dismissState = rememberDismissState(initialValue = DismissValue.Default)
                             if (dismissState.isDismissed((DismissDirection.EndToStart))) {
                                 rememberedScope.launch {
                                     viewModel.removeURL(url)
-                                    dismissState = DismissState(DismissValue.Default)
                                 }
                             }
                             SwipeToDismiss(
@@ -165,14 +164,34 @@ fun ConfigScreen(
                                             Color.White
                                         )
                                     ) {
-                                        Text(
-                                            text = url.url,
-                                            modifier = Modifier
-                                                .padding(8.dp)
-                                                .align(Alignment.Start),
-                                            fontSize = TextUnit(12F, TextUnitType.Sp),
-                                            maxLines = 1
-                                        )
+                                        Row(
+                                            modifier = Modifier.align(Alignment.Start)
+                                        ) {
+                                            Text(
+                                                text = url.url,
+                                                modifier = Modifier
+                                                    .padding(8.dp)
+                                                    .align(Alignment.CenterVertically)
+                                                    .weight(2F),
+                                                fontSize = TextUnit(12F, TextUnitType.Sp),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            Box(modifier = Modifier
+                                                .weight(0.5F)
+                                                .fillMaxWidth()
+                                            ) {
+                                                LottieAnimation(
+                                                    composition = composition,
+                                                    iterations = LottieConstants.IterateForever,
+                                                    modifier = Modifier
+                                                        .align(Alignment.CenterEnd)
+                                                        .padding(0.dp, 8.dp, 10.dp, 8.dp)
+                                                        .size(12.dp)
+                                                        .scale(4F)
+                                                )
+                                            }
+                                        }
                                     }
                                 },
                                 directions = setOf(DismissDirection.EndToStart)

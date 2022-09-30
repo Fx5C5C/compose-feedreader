@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -35,10 +36,14 @@ fun FeedScreen(
     Scaffold(
         floatingActionButton = {
             ComposefeedreaderTheme {
-                FloatingActionButton(onClick = { navController.navigate("config")  }) {
+                FloatingActionButton(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    onClick = { navController.navigate("config")  }
+                ) {
                     Icon(
                         Icons.Default.Add,
-                        contentDescription = "AddFeed"
+                        contentDescription = "AddFeed",
+                        tint = Color.White
                     )
 
                 }
