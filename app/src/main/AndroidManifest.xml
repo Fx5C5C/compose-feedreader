@@ -14,6 +14,7 @@
         <activity
             android:name=".FeedActivity"
             android:exported="true"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.Composefeedreader">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

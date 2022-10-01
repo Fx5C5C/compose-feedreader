@@ -8,11 +8,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.material3.Button
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -22,9 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
@@ -38,7 +34,6 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import de.critequal.mobile.composefeedreader.FeedViewModel
 import de.critequal.mobile.composefeedreader.R
 import de.critequal.mobile.composefeedreader.ui.theme.ComposefeedreaderTheme
-import de.critequal.mobile.composefeedreader.ui.theme.RedTranslucent40
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -58,31 +53,18 @@ fun ConfigScreen(
     }
 
     Scaffold(
-        floatingActionButton = {
-            ComposefeedreaderTheme {
-                FloatingActionButton(
-                    shape = androidx.compose.material3.MaterialTheme.shapes.extraLarge,
-                    onClick = { navController.navigateUp()  }
-                ) {
-                    Icon(
-                        Icons.Default.ArrowBack,
-                        tint = Color.White,
-                        contentDescription = "Back"
-                    )
-
-                }
-            }
-        },
+        topBar = { AppBar() },
+        bottomBar = { BottomNavigationBar(navController = navController) },
         content = {
             ComposefeedreaderTheme {
                 val textState = remember { mutableStateOf(TextFieldValue()) }
                 Column (
                     modifier = Modifier.wrapContentWidth(
                         align = Alignment.CenterHorizontally
-                    )) {
+                    ).padding(0.dp, 58.dp, 0.dp, 0.dp)) {
                     TextField(
                         value = textState.value,
-                        placeholder = { Text("Feed Url") },
+                        placeholder = { Text("e.g. https://wwww.news.com/rss") },
                         onValueChange = { textState.value = it },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -98,7 +80,8 @@ fun ConfigScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
+                            .padding(horizontal = 8.dp),
+                        shape = androidx.compose.material3.MaterialTheme.shapes.small
                     ) {
                         Icon(
                             Icons.Default.Add,
@@ -107,7 +90,7 @@ fun ConfigScreen(
                         Text(text = "Add")
                     }
                     Divider(
-                        thickness = 2.dp,
+                        thickness = 1.dp,
                         modifier = Modifier.padding(8.dp)
                     )
                     LazyColumn {
@@ -123,7 +106,7 @@ fun ConfigScreen(
                                 background = {
                                     val color = when (dismissState.dismissDirection) {
                                         DismissDirection.StartToEnd -> Color.Green
-                                        DismissDirection.EndToStart -> RedTranslucent40
+                                        DismissDirection.EndToStart -> Color.Transparent
                                         null -> Color.Transparent
                                     }
                                     val direction = dismissState.dismissDirection
@@ -139,17 +122,9 @@ fun ConfigScreen(
                                                 Icon(
                                                     imageVector = Icons.Default.Delete,
                                                     contentDescription = null,
-                                                    tint = Color.White,
+                                                    tint = Color.Red,
                                                     modifier = Modifier.align(Alignment.CenterHorizontally)
                                                 )
-                                                Spacer(modifier = Modifier.heightIn(5.dp))
-                                                Text(
-                                                    text = "Remove",
-                                                    textAlign = TextAlign.Center,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = Color.LightGray
-                                                )
-
                                             }
                                         }
                                     }
@@ -159,13 +134,17 @@ fun ConfigScreen(
                                         elevation = CardDefaults.cardElevation(2.dp),
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(4.dp),
+                                            .padding(4.dp)
+                                            .height(42.dp),
                                         colors = CardDefaults.cardColors(
                                             Color.White
-                                        )
+                                        ),
+                                        shape = androidx.compose.material3.MaterialTheme.shapes.extraSmall
                                     ) {
                                         Row(
-                                            modifier = Modifier.align(Alignment.Start)
+                                            modifier = Modifier
+                                                .align(Alignment.Start)
+                                                .fillMaxHeight()
                                         ) {
                                             Text(
                                                 text = url.url,
@@ -180,6 +159,7 @@ fun ConfigScreen(
                                             Box(modifier = Modifier
                                                 .weight(0.5F)
                                                 .fillMaxWidth()
+                                                .fillMaxHeight()
                                             ) {
                                                 LottieAnimation(
                                                     composition = composition,
